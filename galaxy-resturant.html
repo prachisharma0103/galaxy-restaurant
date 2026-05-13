@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Galaxy Restaurant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0d0800;
+      --bg2: #160e02;
+      --gold: #c8922a;
+      --gold2: #e8b84b;
+      --gold3: #f5d98a;
+      --cream: #f5eedc;
+      --muted: #9a8060;
+      --card: rgba(255,255,255,0.03);
+      --border: rgba(200,146,42,0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Jost', sans-serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── BACKGROUND ── */
+    .bg-fixed {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .bg-fixed::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,146,42,0.13) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,100,20,0.10) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 50% at 10% 50%, rgba(180,120,20,0.07) 0%, transparent 50%);
+    }
+    /* Noise texture */
+    .bg-fixed::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.4;
+    }
+    /* Floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float linear infinite;
+    }
+    .orb1 { width: 500px; height: 500px; background: rgba(200,146,42,0.07); top: -100px; left: -100px; animation-duration: 20s; }
+    .orb2 { width: 400px; height: 400px; background: rgba(220,100,30,0.06); bottom: 10%; right: -100px; animation-duration: 25s; animation-direction: reverse; }
+    .orb3 { width: 300px; height: 300px; background: rgba(200,146,42,0.05); top: 40%; left: 30%; animation-duration: 18s; }
+    @keyframes float {
+      0%   { transform: translate(0, 0) scale(1); }
+      33%  { transform: translate(30px, -30px) scale(1.05); }
+      66%  { transform: translate(-20px, 20px) scale(0.97); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* Stars */
+    .stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 8% 15%, rgba(245,217,138,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 55%, rgba(245,217,138,0.4) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 45% 8%, rgba(245,217,138,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 75%, rgba(245,217,138,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 30%, rgba(245,217,138,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 85%, rgba(245,217,138,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 45%, rgba(245,217,138,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 65%, rgba(245,217,138,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 90%, rgba(245,217,138,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 72% 12%, rgba(245,217,138,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5% 42%, rgba(245,217,138,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 88% 88%, rgba(245,217,138,0.6) 0%, transparent 100%);
+    }
+
+    /* ── LAYOUT ── */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 28px 100px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 100px 0 60px;
+      animation: fadeDown 1s ease both;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 28px;
+    }
+    .hero-badge::before,
+    .hero-badge::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.5;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: 2px;
+      background: linear-gradient(180deg, var(--gold3) 0%, var(--gold) 60%, #8a5a10 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+    }
+    .hero-star {
+      font-size: 1.5rem;
+      display: block;
+      margin: 16px 0;
+      color: var(--gold);
+      letter-spacing: 12px;
+      opacity: 0.7;
+    }
+    .hero p {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.8;
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 56px 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+    .divider-icon { color: var(--gold); font-size: 1rem; opacity: 0.6; }
+
+    /* ── SECTION HEADER ── */
+    .sec-head {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .sec-head .label {
+      font-size: 10px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+    .sec-head h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 600;
+      color: var(--cream);
+      letter-spacing: 1px;
+    }
+
+    /* ── MENU GRID ── */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .menu-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 24px;
+      position: relative;
+      transition: all 0.35s;
+      overflow: hidden;
+    }
+    .menu-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(200,146,42,0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .menu-card:hover { border-color: rgba(200,146,42,0.5); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+    .menu-card:hover::before { opacity: 1; }
+    .menu-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+    .menu-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--cream);
+      line-height: 1.3;
+    }
+    .price {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold2);
+      white-space: nowrap;
+      background: rgba(200,146,42,0.1);
+      border: 1px solid rgba(200,146,42,0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .menu-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── TABLE ── */
+    .special-wrap {
+      background: linear-gradient(135deg, rgba(200,146,42,0.08), rgba(200,80,20,0.05));
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: rgba(200,146,42,0.15);
+      color: var(--gold2);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 18px 24px;
+      text-align: left;
+      font-weight: 500;
+    }
+    td {
+      padding: 20px 24px;
+      font-size: 14px;
+      color: var(--cream);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+    }
+    tr:hover td { background: rgba(200,146,42,0.04); }
+
+    /* ── ALLERGIES ── */
+    .allergy-box {
+      background: rgba(200,60,60,0.06);
+      border: 1px solid rgba(200,60,60,0.2);
+      border-radius: 2px;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .allergy-box .icon { font-size: 1.5rem; }
+    .allergy-box p { font-size: 13px; color: var(--muted); }
+    .allergy-box strong { color: #e87070; font-size: 14px; display: block; margin-bottom: 4px; }
+
+    /* ── FORM ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.8;
+    }
+    .form-group input {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 14px 16px;
+      color: var(--cream);
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+      color-scheme: dark;
+    }
+    .form-group input:focus { border-color: var(--gold); }
+    .form-group input::placeholder { color: var(--muted); opacity: 0.5; }
+    .btn-book {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--gold), #8a5a10);
+      border: none;
+      color: var(--bg);
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-radius: 2px;
+    }
+    .btn-book:hover { opacity: 0.85; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(200,146,42,0.3); }
+
+    /* ── CONTACT ── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .contact-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .contact-card:hover { border-color: rgba(200,146,42,0.5); transform: translateY(-3px); }
+    .contact-card .icon { font-size: 1.8rem; margin-bottom: 12px; display: block; }
+    .contact-card .clabel { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 6px; }
+    .contact-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* ── SOCIAL ── */
+    .social-row { display: flex; justify-content: center; gap: 16px; margin-top: 32px; }
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+    }
+    .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .menu-grid, .form-grid, .contact-grid { grid-template-columns: 1fr; }
+      .social-row { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-fixed">
+  <div class="stars"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">✦ Est. 2026 ✦</div>
+    <h1>GALAXY</h1>
+    <span class="hero-star">✦ ✦ ✦</span>
+    <p><i>Welcome to Galaxy Restaurant — hope you'll enjoy our service and make sure to rate your experience. Your comfort is our priority!!!!</i></p>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- STARTERS -->
+  <div class="sec-head">
+    <p class="label">To Begin</p>
+    <h2>Starters</h2>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Cheese Balls</h3>
+        <span class="price">₹250</span>
+      </div>
+      <p>A delicious starter filled with multiple spices and full of cheese with some veggies — onions, lettuce, etc.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Paneer Balls</h3>
+        <span class="price">₹230</span>
+      </div>
+      <p>Filled with multiple spices and full of paneer with some veggies — onions, lettuce, cabbage, etc.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Chicken Wings</h3>
+        <span class="price">₹270</span>
+      </div>
+      <p>A fabulous starter filled with spicy filling, crispy deep-fried chicken with onions, lettuce and tomato.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Paneer Chilli</h3>
+        <span class="price">₹300</span>
+      </div>
+      <p>Super crispy starter filled with multiple spices, mixed with vegetable gravy and fried paneer.</p>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- MAIN COURSE -->
+  <div class="sec-head">
+    <p class="label">The Heart of the Meal</p>
+    <h2>Main Course</h2>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Aloo Paratha (2pcs)</h3>
+        <span class="price">₹150</span>
+      </div>
+      <p>Indian mix spices with smashed potatoes and freshly prepared veggies to enhance your taste.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Cheese Kofta</h3>
+        <span class="price">₹430</span>
+      </div>
+      <p>Freshly prepared cheese roasted to perfection — a chef's kiss with the best spices and gravy.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Tandoori Chicken</h3>
+        <span class="price">₹370</span>
+      </div>
+      <p>Deeply fried crispy chicken to enhance your taste buds with fresh veggies and rich gravy.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Lacha Paratha (2pcs)</h3>
+        <span class="price">₹50</span>
+      </div>
+      <p>An incredible paratha made for Tandoori Chicken or Cheese Kofta — splashed with the finest butter.</p>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- DESSERTS -->
+  <div class="sec-head">
+    <p class="label">Sweet Endings</p>
+    <h2>Desserts</h2>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Chocolate Icecream (2 scoops)</h3>
+        <span class="price">₹100</span>
+      </div>
+      <p>Filled with delicious choco chips, rich chocolate and a generous drizzle of chocolate syrup.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Icecream Sundae</h3>
+        <span class="price">₹130</span>
+      </div>
+      <p>Filled with delicious icecreams as per your taste — every flavour to cool and relax your mind.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Falooda (Any Flavour)</h3>
+        <span class="price">₹80</span>
+      </div>
+      <p>Taste that suits your buds — filled with dry fruits too, every flavour you're looking for.</p>
+    </div>
+    <div class="menu-card">
+      <div class="menu-card-top">
+        <h3>Gulab Jamun (3 pcs)</h3>
+        <span class="price">₹50</span>
+      </div>
+      <p>Every Indian's favourite — deeply cooked and mixed with sweet warm sauce and tasty filling.</p>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- TODAY'S SPECIAL -->
+  <div class="sec-head">
+    <p class="label">Limited Time</p>
+    <h2>Today's Specials</h2>
+  </div>
+  <div class="special-wrap">
+    <table>
+      <tr>
+        <th>Special Dish</th>
+        <th>Price</th>
+      </tr>
+      <tr>
+        <td>🍛 <strong>Galaxy Special Biryani</strong> — Mixed with all veggies, paneer or chicken as per your choice, spicy sauces with perfectly cooked rice.</td>
+        <td><span class="price">₹320</span></td>
+      </tr>
+      <tr>
+        <td>🍮 <strong>Rasgulla</strong> — Filled with sweet syrup, one of the best desserts of all time from the Galaxy.</td>
+        <td><span class="price">₹60</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- ALLERGIES -->
+  <div class="allergy-box">
+    <span class="icon">⚠️</span>
+    <div>
+      <strong>Allergy Information</strong>
+      <p>Some dishes may contain: <strong style="color:#e87070">Peanuts, Walnuts, Sour Cream.</strong> Please inform your server of any allergies before ordering.</p>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- BOOK A TABLE -->
+  <div class="sec-head">
+    <p class="label">Reservations</p>
+    <h2>Book a Table</h2>
+  </div>
+  <form>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="number" placeholder="Enter your number">
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date">
+      </div>
+      <div class="form-group">
+        <label>Number of Guests</label>
+        <input type="number" placeholder="How many people?">
+      </div>
+    </div>
+    <button class="btn-book">✦ Book Now ✦</button>
+  </form>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- CONTACT -->
+  <div class="sec-head">
+    <p class="label">Find Us</p>
+    <h2>Contact & Address</h2>
+  </div>
+  <div class="contact-grid">
+    <a href="mailto:abc@gmail.com" class="contact-card">
+      <span class="icon">✉️</span>
+      <p class="clabel">Email Us</p>
+      <p>abc@gmail.com</p>
+    </a>
+    <div class="contact-card">
+      <span class="icon">📍</span>
+      <p class="clabel">Address</p>
+      <p>S T Depot, S T Road, Nalasopara West, Palghar - 401203, Maharashtra</p>
+    </div>
+    <div class="contact-card">
+      <span class="icon">⏰</span>
+      <p class="clabel">Hours</p>
+      <p>Mon – Sun<br>11:00 AM – 11:00 PM</p>
+    </div>
+  </div>
+
+  <div class="social-row">
+    <a href="https://chat.whatsapp.com/BCBjJrmlaNM5CdMO8ESzIz" class="social-btn" target="_blank">💬 WhatsApp</a>
+    <a href="#" class="social-btn">📸 Instagram</a>
+  </div>
+
+</div>
+
+<footer>
+  ✦ Galaxy Restaurant — Nalasopara, Mumbai, 2026 ✦
+</footer>
+
+</body>
+</html>
